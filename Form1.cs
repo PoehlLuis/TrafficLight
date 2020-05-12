@@ -52,9 +52,9 @@ namespace Ampelsteuerung
         {
             InitializeComponent();
 
-            txbGreen.Text = "0";
-            txbOrange.Text = "0";
-            txbRed.Text = "0";
+            txbGreen.Text = "10";
+            txbOrange.Text = "5";
+            txbRed.Text = "10";
 
             a = panelRed.CreateGraphics();
             b = panelOrange.CreateGraphics();
@@ -89,7 +89,7 @@ namespace Ampelsteuerung
 
                 if (txbGreen.Text == string.Empty)
                 {
-                    txbGreen.Text = "0";
+                    txbGreen.Text = "10";
 
                 }
                 if (!Int32.TryParse(txbGreen.Text, out secondsGreen))
@@ -100,6 +100,10 @@ namespace Ampelsteuerung
                 {
 
                     throw new Exception("Number is to large");
+                }
+                else if (secondsGreen < 10)
+                {
+                    throw new Exception("Number is to small");
                 }
 
 
@@ -120,7 +124,7 @@ namespace Ampelsteuerung
 
                 if (txbOrange.Text == string.Empty)
                 {
-                    txbOrange.Text = "0";
+                    txbOrange.Text = "5";
 
                 }
                 if (!Int32.TryParse(txbOrange.Text, out secondsOrange))
@@ -131,6 +135,10 @@ namespace Ampelsteuerung
                 {
 
                     throw new Exception("Number is to large");
+                }
+                else if(secondsOrange < 5)
+                {
+                    throw new Exception("Number is to small");
                 }
 
 
@@ -150,7 +158,7 @@ namespace Ampelsteuerung
 
                 if (txbRed.Text == string.Empty)
                 {
-                    txbRed.Text = "0";
+                    txbRed.Text = "10";
 
                 }
                 if (!Int32.TryParse(txbRed.Text, out secondsRed))
@@ -161,6 +169,10 @@ namespace Ampelsteuerung
                 {
 
                     throw new Exception("Number is to large");
+                }
+                else if (secondsRed < 10)
+                {
+                    throw new Exception("Number is to small");
                 }
 
 
@@ -214,35 +226,41 @@ namespace Ampelsteuerung
         private void btnStop_Click(object sender, EventArgs e)
         {
             currentstatus = Status.workingmode;
-            cbStatus.SelectedItem = cbStatus.Items[1];
+            cbStatus.SelectedItem = cbStatus.Items[0];
             startRed = false;
             startGreen = false;
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-
-            sumSeconds = secondsGreen + secondsOrange + secondsRed;
-            if (cbStatus.SelectedItem.ToString() == "Working mode")
+            try
             {
-                if (rbGreen.Checked)
+                sumSeconds = secondsGreen + secondsOrange + secondsRed;
+                if (cbStatus.SelectedItem.ToString() == "Working mode")
                 {
-                    startGreen = true;
-                    startRed = false;
-                    currentstatus = Status.green;
-                    seconds = 1;
+                    if (rbGreen.Checked)
+                    {
+                        startGreen = true;
+                        startRed = false;
+                        currentstatus = Status.green;
+                        seconds = 1;
+                    }
+                    else
+                    {
+                        startRed = true;
+                        startGreen = false;
+                        currentstatus = Status.red;
+                        seconds = 1;
+                    }
                 }
                 else
                 {
-                    startRed = true;
-                    startGreen = false;
-                    currentstatus = Status.red;
-                    seconds = 1;
+                    throw new Exception("The system can only start in working mode");
                 }
             }
-            else
+            catch(Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
         }
         #endregion
@@ -380,44 +398,53 @@ namespace Ampelsteuerung
 
         private void btnPed_Click(object sender, EventArgs e)
         {
-            privateTimer = seconds;
-            int startsecond = seconds;
-            if (currentstatus == Status.green && startGreen)
+            try
             {
-                while(privateTimer != startsecond + 5)
+                privateTimer = seconds;
+                int startsecond = seconds;
+                if (currentstatus == Status.green && startGreen)
                 {
-                    Thread.Sleep(1000);
-                    privateTimer++;
-                }
-                
+                    while (privateTimer != startsecond + 5)
+                    {
+                        Thread.Sleep(1000);
+                        privateTimer++;
+                    }
 
-                while(privateTimer <= 1 + 10)
-                {
-                    Thread.Sleep(1000);
-                    privateTimer++; 
+
+                    while (privateTimer <= 1 + 10)
+                    {
+                        Thread.Sleep(1000);
+                        privateTimer++;
+                    }
+                    currentstatus = Status.orange;
+                    seconds += secondsGreen - seconds;
                 }
-                currentstatus = Status.orange;
-                seconds += secondsGreen - seconds;
+                else if (currentstatus == Status.green && startRed)
+                {
+                    while (privateTimer != startsecond + 5)
+                    {
+                        Thread.Sleep(1000);
+                        privateTimer++;
+                    }
+
+
+                    while (privateTimer <= 1 + 10 + secondsRed)
+                    {
+                        Thread.Sleep(1000);
+                        privateTimer++;
+                    }
+                    currentstatus = Status.orange;
+                    seconds += secondsGreen + secondsRed - seconds;
+                }
+                else
+                {
+                    throw new Exception("The button can only do something when the traffic light is red");
+                }
             }
-            else if(currentstatus == Status.green && startRed)
+            catch(Exception ex)
             {
-                while (privateTimer != startsecond + 5)
-                {
-                    Thread.Sleep(1000);
-                    privateTimer++;
-                }
-
-
-                while (privateTimer <= 1 + 10+secondsRed)
-                {
-                    Thread.Sleep(1000);
-                    privateTimer++;
-                }
-                currentstatus = Status.orange;
-                seconds += secondsGreen+secondsRed - seconds;
+                MessageBox.Show(ex.Message);
             }
-
-
         }
 
         private void timerPrivate_Tick(object sender, EventArgs e)
