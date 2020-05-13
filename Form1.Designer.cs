@@ -338,11 +338,7 @@
             this.btnPed.UseVisualStyleBackColor = true;
             this.btnPed.Click += new System.EventHandler(this.btnPed_Click);
             // 
-            // timerPrivate
-            // 
-            this.timerPrivate.Interval = 1000;
-            this.timerPrivate.Tick += new System.EventHandler(this.timerPrivate_Tick);
-            // 
+            
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);

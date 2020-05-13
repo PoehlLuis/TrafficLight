@@ -52,10 +52,13 @@ namespace Ampelsteuerung
         {
             InitializeComponent();
 
+            #region textbox initialization
             txbGreen.Text = "10";
             txbOrange.Text = "5";
             txbRed.Text = "10";
+            #endregion
 
+            #region graphics initialization
             a = panelRed.CreateGraphics();
             b = panelOrange.CreateGraphics();
             c = panelGreen.CreateGraphics();
@@ -67,6 +70,7 @@ namespace Ampelsteuerung
             c.DrawEllipse(new Pen(Color.Black), rec);
             d.DrawEllipse(new Pen(Color.Black), rec);
             f.DrawEllipse(new Pen(Color.Black), rec);
+            #endregion
 
             #region comboBox initialization
             cbStatus.Items.Add("Standby");
@@ -75,6 +79,7 @@ namespace Ampelsteuerung
             #endregion
 
             rbGreen.Checked = true;
+
             timerSeconds.Start();
         }
         #endregion
@@ -182,6 +187,7 @@ namespace Ampelsteuerung
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+         
             }
         }
         #endregion
@@ -231,8 +237,56 @@ namespace Ampelsteuerung
             startGreen = false;
         }
 
+        private void btnPed_Click(object sender, EventArgs e)
+        {
+
+            privateTimer = seconds;
+            int startsecond = seconds;
+            if (currentstatus == Status.green && startGreen)
+            {
+                while (privateTimer != startsecond + 5)
+                {
+                    Thread.Sleep(1000);
+                    privateTimer++;
+                }
+
+
+                while (privateTimer <= 1 + 10)
+                {
+                    Thread.Sleep(1000);
+                    privateTimer++;
+                }
+                currentstatus = Status.orange;
+                seconds += secondsGreen - seconds;
+            }
+            else if (currentstatus == Status.green && startRed)
+            {
+                while (privateTimer != startsecond + 5)
+                {
+                    Thread.Sleep(1000);
+                    privateTimer++;
+                }
+
+
+                while (privateTimer <= 1 + 10 + secondsRed)
+                {
+                    Thread.Sleep(1000);
+                    privateTimer++;
+                }
+                currentstatus = Status.orange;
+                seconds += secondsGreen + secondsRed - seconds;
+            }
+            else
+            {
+                throw new Exception("The button can only do something when the traffic light is red");
+            }
+
+        }
+
         private void btnStart_Click(object sender, EventArgs e)
         {
+
+
             try
             {
                 sumSeconds = secondsGreen + secondsOrange + secondsRed;
@@ -243,6 +297,7 @@ namespace Ampelsteuerung
                         startGreen = true;
                         startRed = false;
                         currentstatus = Status.green;
+                        startUpOrange();
                         seconds = 1;
                     }
                     else
@@ -250,6 +305,7 @@ namespace Ampelsteuerung
                         startRed = true;
                         startGreen = false;
                         currentstatus = Status.red;
+                        startUpOrange();
                         seconds = 1;
                     }
                 }
@@ -263,6 +319,8 @@ namespace Ampelsteuerung
                 MessageBox.Show(ex.Message);
             }
         }
+
+       
         #endregion
 
         #region Timer
@@ -396,61 +454,22 @@ namespace Ampelsteuerung
 
         #endregion
 
-        private void btnPed_Click(object sender, EventArgs e)
+        #region private methods
+        private void startUpOrange()
         {
-            try
+            int i = 0;
+            while (i < 7)
             {
-                privateTimer = seconds;
-                int startsecond = seconds;
-                if (currentstatus == Status.green && startGreen)
-                {
-                    while (privateTimer != startsecond + 5)
-                    {
-                        Thread.Sleep(1000);
-                        privateTimer++;
-                    }
-
-
-                    while (privateTimer <= 1 + 10)
-                    {
-                        Thread.Sleep(1000);
-                        privateTimer++;
-                    }
-                    currentstatus = Status.orange;
-                    seconds += secondsGreen - seconds;
-                }
-                else if (currentstatus == Status.green && startRed)
-                {
-                    while (privateTimer != startsecond + 5)
-                    {
-                        Thread.Sleep(1000);
-                        privateTimer++;
-                    }
-
-
-                    while (privateTimer <= 1 + 10 + secondsRed)
-                    {
-                        Thread.Sleep(1000);
-                        privateTimer++;
-                    }
-                    currentstatus = Status.orange;
-                    seconds += secondsGreen + secondsRed - seconds;
-                }
-                else
-                {
-                    throw new Exception("The button can only do something when the traffic light is red");
-                }
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
+                a.FillEllipse(offRed, rec);
+                b.FillEllipse(onOrange, rec);
+                c.FillEllipse(offGreen, rec);
+                d.FillEllipse(offRed, rec);
+                f.FillEllipse(offGreen, rec);
+                Thread.Sleep(1000);
+                i++;
             }
         }
-
-        private void timerPrivate_Tick(object sender, EventArgs e)
-        {
-            privateTimer++;
-        }
+        #endregion
     }
 }
 
